@@ -8,6 +8,8 @@ typedef struct {
 
 // create
 
+// compute_idx
+
 // set data (takes 2d array)
 // set row (takes 1d array and index)
 // set column (takes 1d array and index)
@@ -18,6 +20,7 @@ typedef struct {
 // NOTE: the user would have to free the space allocated by these functions, maybe add column_free() and row_free() funcs
 // get row
 // get column
+
 // get index
 
 // remove row
