@@ -7,21 +7,26 @@ typedef struct {
 } Matrix;
 
 // create
+int matrix_init(Matrix *m, int rows, int columns);
 
 // compute_idx
+int matrix_compute_idx(Matrix *m, int column, int row);
 
 // set data (takes 2d array)
-// set row (takes 1d array and index)
-// set column (takes 1d array and index)
-// set index (takes two ints, x and y)
+void matrix_set_data(Matrix *m, double data[m->rows][m->columns]);
 
-// (MAYBE HAVE THESE) 
-// NOTE: return pointers to newly allocated space of the row / column
-// NOTE: the user would have to free the space allocated by these functions, maybe add column_free() and row_free() funcs
-// get row
-// get column
+// set row (takes 1d array and index)
+int matrix_set_row(Matrix *m, int row, double *data);
+
+// set column (takes 1d array and index)
+int matrix_set_column(Matrix *m, int column, double *data);
+
+// set index (takes two ints, x and y)
+int matrix_set_index(Matrix *m, int row, int column);
+
 
 // get index
+double matrix_get_index(Matrix *m, int row, int column);
 
 // remove row
 // remove column
@@ -54,4 +59,6 @@ typedef struct {
 // randomize
 
 // free
+void matrix_free(Matrix *m);
+
 #endif
