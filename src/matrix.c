@@ -28,6 +28,7 @@ int matrix_compute_idx(Matrix *m, int column, int row) {
 }
 
 // copies the contents of a 2d array to the matrix (data array must be the same size as [m->rows][m->columns])
+// NOTE: replace contents of forloop with matrix_set_index(m, r, c)
 void matrix_set_data(Matrix *m, double data[m->rows][m->columns]) {
 	for (int r = 0; r < m->rows; ++r) {
 		for (int c = 0; c < m->columns; ++c) {
@@ -44,7 +45,7 @@ void matrix_set_data(Matrix *m, double data[m->rows][m->columns]) {
 
 // }
 
-// int matrix_set_index(Matrix *m, int row, int column) {
+// int matrix_set_index(Matrix *m, int row, int column, double data) {
 
 // }
 
