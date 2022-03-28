@@ -2,6 +2,8 @@
 #include <string.h>
 #include "matrix.h"
 
+#define DATA_AT(m, r, c) m->data[matrix_compute_idx(m, r, c)]
+
 /*
 initializes the matrix, returns -1 if the rows or columns specified are invalid, or if allocation fails
 all members of the matrix will be initialized to 0 if initialization failed
@@ -20,6 +22,24 @@ int matrix_init(Matrix *m, int rows, int columns) {
 	m->columns = columns;
 
 	return 0;
+}
+
+// returns 0 if the matrix is not square, returns 1 if it is
+int matrix_check_square(Matrix *m) {
+	if (m->rows != m->columns) return 0;
+	return 1;
+}
+
+// returns 0 if the matrix is not null, returns 1 if it is
+int matrix_check_null(Matrix *m) {
+	if (m->data != NULL) return 0;
+	return 1;
+}
+
+// returns 0 if rows and columns do not match m's dimentions, returns 1 if they do
+int matrix_check_dim(Matrix *m, int rows, int columns) {
+	if (m->rows != rows || m->columns != columns) return 0;
+	return 1;
 }
 
 /*
@@ -91,7 +111,7 @@ returns -1 if the provided matrix isn't square
 returns 0 otherwise
 */
 int matrix_set_identity(Matrix *m) {
-	if (m->rows != m->columns) return -1;
+	if (!matrix_check_square(m)) return -1;
 
 	for (int r = 0; r < m->rows; ++r) {
 		for (int c = 0; c < m->columns; ++c) {
@@ -106,6 +126,80 @@ int matrix_set_identity(Matrix *m) {
 	return 0;
 }
 
+// multiply
+int matrix_multiply(Matrix *m1, Matrix *m2, Matrix *dest) {
+	if (m2->rows != m1->columns) return -1;
+
+	if (matrix_check_null(dest)) {
+		int result = matrix_init(dest, m1->rows, m2->columns);
+
+		if (result == -1) return -1;
+	} else if (!matrix_check_dim(dest, m1->rows, m2->columns)) {
+		return -1;
+	}
+
+	for (int r = 0; r < m1->rows; ++r) {
+		for (int c = 0; c < m2->columns; ++c) {
+			double result = 0;
+			for (int i = 0; i < m1->columns; ++i) {
+				result += DATA_AT(m1, r, i) * DATA_AT(m2, i, c);
+			}
+			matrix_set_index(dest, r, c, result);
+		}
+	}
+
+	return 0;
+}
+
+// multiply scalar
+void matrix_multiply_scalar(Matrix *m, double scalar) {
+	for (int r = 0; r < m->rows; ++r) {
+		for (int c = 0; c < m->columns; ++c) {
+			DATA_AT(m, r, c) *= scalar;
+		}
+	}
+}
+
+// add
+int matrix_add(Matrix *m1, Matrix *m2) {
+	if (!matrix_check_dim(m1, m2->rows, m2->columns)) return -1;
+	for (int r = 0; r < m1->rows; ++r) {
+		for (int c = 0; c < m1->columns; ++c) {
+			DATA_AT(m1, r, c) += DATA_AT(m2, r, c);
+		}
+	}
+	return 0;
+}
+
+// add const
+void matrix_add_const(Matrix *m, double c) {
+	for (int r = 0; r < m->rows; ++r) {
+		for (int c = 0; c < m->columns; ++c) {
+			DATA_AT(m, r, c) += c;
+		}
+	}
+}
+
+// subtract
+int matrix_subtract(Matrix *m1, Matrix *m2) {
+	if (!matrix_check_dim(m1, m2->rows, m2->columns)) return -1;
+	for (int r = 0; r < m1->rows; ++r) {
+		for (int c = 0; c < m1->columns; ++c) {
+			DATA_AT(m1, r, c) -= DATA_AT(m2, r, c);
+		}
+	}
+	return 0;
+}
+
+// subtract const
+void matrix_subtract_const(Matrix *m, double c) {
+	for (int r = 0; r < m->rows; ++r) {
+		for (int c = 0; c < m->columns; ++c) {
+			DATA_AT(m, r, c) -= c;
+		}
+	}
+}
+
 /*
 copies the contents of the first matrix to a desitination matrix
 destination matrix can be uninitialized or already initialized
@@ -114,12 +208,12 @@ if dest is initialized, return -1 if its dimentions do not match m's
 return 0 on success
 */
 int matrix_copy(Matrix *m, Matrix *dest) {
-	if (dest->data == NULL) {
+	if (matrix_check_null(dest)) {
 		int init_result = matrix_init(dest, m->rows, m->columns);
 
 		if (init_result == -1) return -1;
-	} else {
-		if (m->rows != dest->rows || m->columns != dest->columns) return -1;
+	} else if (!matrix_check_dim(dest, m->rows, m->columns)) {
+		return -1;
 	}
 
 	memcpy(dest->data, m->data, m->rows * m->columns * sizeof(double));
@@ -128,13 +222,13 @@ int matrix_copy(Matrix *m, Matrix *dest) {
 }
 
 /*
-run a function on every index of the matrix, the function takes three arguments, 
+run a function on every index of the matrix, the function takes three arguments,
 the data at the current index, and the current row and column being evaluated
 */
 void matrix_map(Matrix *m, double (*func)(double, int, int)) {
 	for (int r = 0; r < m->rows; ++r) {
 		for (int c = 0; c < m->columns; ++c) {
-			matrix_set_index(m, r, c, func(m->data[matrix_compute_idx(m, r, c)], r, c));
+			matrix_set_index(m, r, c, func(DATA_AT(m, r, c), r, c));
 		}
 	}
 }

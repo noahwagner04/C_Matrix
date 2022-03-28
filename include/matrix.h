@@ -6,6 +6,11 @@ typedef struct {
 	int rows, columns;
 } Matrix;
 
+// matrix check fucntions
+int matrix_check_square(Matrix *m);
+int matrix_check_null(Matrix *m);
+int matrix_check_dim(Matrix *m, int rows, int columns);
+
 // create
 int matrix_init(Matrix *m, int rows, int columns);
 
@@ -18,6 +23,7 @@ int matrix_set_index(Matrix *m, int row, int column, double data);
 /*
 NOTE: for the set functions below, consider adding a check to see 
 if the provided data array matches the matrix row / column length
+use sizeof
 */
 
 // set data (takes 2d array)
@@ -49,12 +55,22 @@ remove column
 // add multiple of row
 
 // multiply
+int matrix_multiply(Matrix *m1, Matrix *m2, Matrix *dest);
+
+// multiply scalar
+void matrix_multiply_scalar(Matrix *m, double scalar);
 
 // add
+int matrix_add(Matrix *m1, Matrix *m2);
+
 // add const
+void matrix_add_const(Matrix *m, double c);
 
 // subtract
+int matrix_subtract(Matrix *m1, Matrix *m2);
+
 // subtract const
+void matrix_subtract_const(Matrix *m, double c);
 
 // invert
 
@@ -77,5 +93,7 @@ void matrix_map(Matrix *m, double (*func)(double, int, int));
 
 // free
 void matrix_free(Matrix *m);
+
+// write a temporary show function (for debuging purposes), maybe keep it?
 
 #endif
