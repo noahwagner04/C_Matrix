@@ -1,3 +1,4 @@
+#include <stdio.h> // only used for matrix_print function, remove when done with library
 #include <stdlib.h>
 #include <string.h>
 #include "matrix.h"
@@ -10,6 +11,7 @@ all members of the matrix will be initialized to 0 if initialization failed
 returns 0 if initialization was successful
 */
 int matrix_init(Matrix *m, int rows, int columns) {
+	// incase allocation fails, the contents of the matrix will be all 0's
 	memset(m, 0, sizeof(Matrix));
 
 	if (rows < 0 || columns < 0) return -1;
@@ -24,6 +26,16 @@ int matrix_init(Matrix *m, int rows, int columns) {
 	return 0;
 }
 
+int matrix_reset(Matrix *m, int rows, int columns) {
+	matrix_free(m);
+
+	int init_result = matrix_init(m, rows, columns);
+
+	if (init_result == -1) return -1;
+
+	return 0;
+}
+
 // returns 0 if the matrix is not square, returns 1 if it is
 int matrix_check_square(Matrix *m) {
 	if (m->rows != m->columns) return 0;
@@ -31,6 +43,7 @@ int matrix_check_square(Matrix *m) {
 }
 
 // returns 0 if the matrix is not null, returns 1 if it is
+// NOTE: maybe remove, i don't use this
 int matrix_check_null(Matrix *m) {
 	if (m->data != NULL) return 0;
 	return 1;
@@ -130,12 +143,10 @@ int matrix_set_identity(Matrix *m) {
 int matrix_multiply(Matrix *m1, Matrix *m2, Matrix *dest) {
 	if (m2->rows != m1->columns) return -1;
 
-	if (matrix_check_null(dest)) {
-		int result = matrix_init(dest, m1->rows, m2->columns);
+	if (!matrix_check_dim(dest, m1->rows, m2->columns)) {
+		int reset_result = matrix_reset(dest, m1->rows, m2->columns);
 
-		if (result == -1) return -1;
-	} else if (!matrix_check_dim(dest, m1->rows, m2->columns)) {
-		return -1;
+		if (reset_result == -1) return -1;
 	}
 
 	for (int r = 0; r < m1->rows; ++r) {
@@ -172,10 +183,10 @@ int matrix_add(Matrix *m1, Matrix *m2) {
 }
 
 // add const
-void matrix_add_const(Matrix *m, double c) {
+void matrix_add_const(Matrix *m, double n) {
 	for (int r = 0; r < m->rows; ++r) {
 		for (int c = 0; c < m->columns; ++c) {
-			DATA_AT(m, r, c) += c;
+			DATA_AT(m, r, c) += n;
 		}
 	}
 }
@@ -192,12 +203,28 @@ int matrix_subtract(Matrix *m1, Matrix *m2) {
 }
 
 // subtract const
-void matrix_subtract_const(Matrix *m, double c) {
+void matrix_subtract_const(Matrix *m, double n) {
 	for (int r = 0; r < m->rows; ++r) {
 		for (int c = 0; c < m->columns; ++c) {
-			DATA_AT(m, r, c) -= c;
+			DATA_AT(m, r, c) -= n;
 		}
 	}
+}
+
+int matrix_transpose(Matrix *m, Matrix *dest) {
+	if (!matrix_check_dim(dest, m->columns, m->rows)) {
+		int reset_result = matrix_reset(dest, m->columns, m->rows);
+
+		if (reset_result == -1) return -1;
+	}
+
+	for (int r = 0; r < dest->rows; ++r) {
+		for (int c = 0; c < dest->columns; ++c) {
+			DATA_AT(dest, r, c) = DATA_AT(m, c, r);
+		}
+	}
+	
+	return 0;
 }
 
 /*
@@ -208,12 +235,10 @@ if dest is initialized, return -1 if its dimentions do not match m's
 return 0 on success
 */
 int matrix_copy(Matrix *m, Matrix *dest) {
-	if (matrix_check_null(dest)) {
-		int init_result = matrix_init(dest, m->rows, m->columns);
+	if (!matrix_check_dim(dest, m->rows, m->columns)) {
+		int reset_result = matrix_reset(dest, m->rows, m->columns);
 
-		if (init_result == -1) return -1;
-	} else if (!matrix_check_dim(dest, m->rows, m->columns)) {
-		return -1;
+		if (reset_result == -1) return -1;
 	}
 
 	memcpy(dest->data, m->data, m->rows * m->columns * sizeof(double));
@@ -235,6 +260,23 @@ void matrix_map(Matrix *m, double (*func)(double, int, int)) {
 
 // frees the memory allocated by the matrix
 void matrix_free(Matrix *m) {
-	memset(m, 0, sizeof(Matrix));
 	free(m->data);
+	memset(m, 0, sizeof(Matrix));
+}
+
+// print the matrix to the terminal, maybe remove after done with library
+void matrix_print(Matrix *m) {
+	printf("{\n");
+	for (int r = 0; r < m->rows; ++r) {
+		printf("{");
+		for (int c = 0; c < m->columns; ++c) {
+			if (c == m->columns - 1) {
+				printf("%f ", DATA_AT(m, r, c));
+				continue;
+			}
+			printf("%f, ", DATA_AT(m, r, c));
+		}
+		printf("}\n");
+	}
+	printf("}\n");
 }

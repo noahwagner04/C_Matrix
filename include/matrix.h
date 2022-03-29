@@ -14,6 +14,9 @@ int matrix_check_dim(Matrix *m, int rows, int columns);
 // create
 int matrix_init(Matrix *m, int rows, int columns);
 
+// reset a matrix
+int matrix_reset(Matrix *m, int rows, int columns);
+
 // compute_idx
 int matrix_compute_idx(Matrix *m, int row, int column);
 
@@ -64,13 +67,13 @@ void matrix_multiply_scalar(Matrix *m, double scalar);
 int matrix_add(Matrix *m1, Matrix *m2);
 
 // add const
-void matrix_add_const(Matrix *m, double c);
+void matrix_add_const(Matrix *m, double n);
 
 // subtract
 int matrix_subtract(Matrix *m1, Matrix *m2);
 
 // subtract const
-void matrix_subtract_const(Matrix *m, double c);
+void matrix_subtract_const(Matrix *m, double n);
 
 // invert
 
@@ -79,6 +82,7 @@ void matrix_subtract_const(Matrix *m, double c);
 // rotate
 
 // transpose
+int matrix_transpose(Matrix *m, Matrix *dest);
 
 // identity
 int matrix_set_identity(Matrix *m);
@@ -89,11 +93,10 @@ int matrix_copy(Matrix *m, Matrix *dest);
 // map
 void matrix_map(Matrix *m, double (*func)(double, int, int));
 
-// randomize
-
 // free
 void matrix_free(Matrix *m);
 
 // write a temporary show function (for debuging purposes), maybe keep it?
+void matrix_print(Matrix *m);
 
 #endif
