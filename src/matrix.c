@@ -26,6 +26,10 @@ int matrix_init(Matrix *m, int rows, int columns) {
 	return 0;
 }
 
+/*
+frees the current memory taken by the matrix, and 
+reinitializes the matrix with new amount of rows and columns
+*/
 int matrix_reset(Matrix *m, int rows, int columns) {
 	matrix_free(m);
 
@@ -223,15 +227,14 @@ int matrix_transpose(Matrix *m, Matrix *dest) {
 			DATA_AT(dest, r, c) = DATA_AT(m, c, r);
 		}
 	}
-	
+
 	return 0;
 }
 
 /*
 copies the contents of the first matrix to a desitination matrix
-destination matrix can be uninitialized or already initialized
-if dest is not initialized, initialize it and return -1 if initialization fails
-if dest is initialized, return -1 if its dimentions do not match m's
+if the desitnation matrix doesn't have the same dimentions as the source matrix,
+reset the matrix to have the correct dimentions, and return -1 if the reset fails
 return 0 on success
 */
 int matrix_copy(Matrix *m, Matrix *dest) {
