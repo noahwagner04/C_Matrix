@@ -1,6 +1,7 @@
 #include <stdio.h> // only used for matrix_print function, remove when done with library
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "matrix.h"
 
 #define DATA_AT(m, r, c) m->data[matrix_compute_idx(m, r, c)]
@@ -27,7 +28,7 @@ int matrix_init(Matrix *m, int rows, int columns) {
 }
 
 /*
-frees the current memory taken by the matrix, and 
+frees the current memory taken by the matrix, and
 reinitializes the matrix with new amount of rows and columns
 */
 int matrix_reset(Matrix *m, int rows, int columns) {
@@ -139,6 +140,96 @@ int matrix_set_identity(Matrix *m) {
 			}
 		}
 	}
+
+	return 0;
+}
+
+int matrix_set_rotation_3d(Matrix *m, double roll, double pitch, double yaw) {
+	if (!matrix_check_dim(m, 3, 3)) return -1;
+
+	double s_r = sin(roll);
+	double c_r = cos(roll);
+
+	double s_p = sin(pitch);
+	double c_p = cos(pitch);
+
+	double s_y = sin(yaw);
+	double c_y = cos(yaw);
+
+	double data[3][3] = {
+		{c_p * c_y, s_r * s_p * c_y - c_r * s_y, c_r * s_p * c_y + s_r * s_y},
+		{c_p * s_y, s_r * s_p * s_y + c_r * c_y, c_r * s_p * s_y - s_r * c_y},
+		{-s_p, s_r * c_p, c_r * c_p}
+	};
+
+	matrix_set_data(m, data);
+
+	return 0;
+}
+
+int matrix_set_rotation_2d(Matrix *m, double angle) {
+	if (!matrix_check_dim(m, 2, 2)) return -1;
+
+	double s = sin(angle);
+	double c = cos(angle);
+
+	double data[2][2] = {
+		{c, -s},
+		{s, c}
+	};
+
+	matrix_set_data(m, data);
+
+	return 0;
+}
+
+int matrix_set_roll(Matrix *m, double roll) {
+	if (!matrix_check_dim(m, 3, 3)) return -1;
+
+	double s = sin(roll);
+	double c = cos(roll);
+
+	double data[3][3] = {
+		{1, 0, 0},
+		{0, c, -s},
+		{0, s, c}
+	};
+
+	matrix_set_data(m, data);
+
+	return 0;
+}
+
+int matrix_set_pitch(Matrix *m, double pitch) {
+	if (!matrix_check_dim(m, 3, 3)) return -1;
+
+	double s = sin(pitch);
+	double c = cos(pitch);
+
+	double data[3][3] = {
+		{c, 0, s},
+		{0, 1, 0},
+		{-s, 0, c}
+	};
+
+	matrix_set_data(m, data);
+
+	return 0;
+}
+
+int matrix_set_yaw(Matrix *m, double yaw) {
+	if (!matrix_check_dim(m, 3, 3)) return -1;
+
+	double s = sin(yaw);
+	double c = cos(yaw);
+
+	double data[3][3] = {
+		{c, -s, 0},
+		{s, c, 0},
+		{0, 0, 1}
+	};
+
+	matrix_set_data(m, data);
 
 	return 0;
 }

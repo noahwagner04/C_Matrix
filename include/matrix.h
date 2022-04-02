@@ -79,7 +79,16 @@ void matrix_subtract_const(Matrix *m, double n);
 
 // determinat
 
-// rotate
+// rotation matricies
+int matrix_set_rotation_3d(Matrix *m, double pitch, double yaw, double roll);
+
+int matrix_set_rotation_2d(Matrix *m, double angle);
+
+int matrix_set_yaw(Matrix *m, double yaw);
+
+int matrix_set_pitch(Matrix *m, double pitch);
+
+int matrix_set_roll(Matrix *m, double roll);
 
 // transpose
 int matrix_transpose(Matrix *m, Matrix *dest);
