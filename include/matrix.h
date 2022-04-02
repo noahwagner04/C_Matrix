@@ -75,6 +75,8 @@ int matrix_subtract(Matrix *m1, Matrix *m2);
 // subtract const
 void matrix_subtract_const(Matrix *m, double n);
 
+// NOTE: make invert take a destination matrix, just like matrix_multiply 
+// also, make it possible to make the input matrix the destination
 // invert
 
 // determinat
