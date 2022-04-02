@@ -10,6 +10,9 @@
 initializes the matrix, returns -1 if the rows or columns specified are invalid, or if allocation fails
 all members of the matrix will be initialized to 0 if initialization failed
 returns 0 if initialization was successful
+
+NOTE: maybe disallow matricies to have 0 rows or columns 
+(although free(NULL) doesn't do anything so..., AND every function works with 0x0 matricies)
 */
 int matrix_init(Matrix *m, int rows, int columns) {
 	// incase allocation fails, the contents of the matrix will be all 0's
@@ -235,6 +238,9 @@ int matrix_set_yaw(Matrix *m, double yaw) {
 }
 
 // multiply
+// NOTE: make this function work with dest being able to be any matrix (including m1 or m2)
+// do this by making a temporary matrix (with the correct dimentions), 
+// and copy its data to dest after everything is finished (make sure to free the temp matrix)
 int matrix_multiply(Matrix *m1, Matrix *m2, Matrix *dest) {
 	if (m2->rows != m1->columns) return -1;
 
