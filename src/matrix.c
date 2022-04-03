@@ -4,7 +4,7 @@
 #include <math.h>
 #include "matrix.h"
 
-#define DATA_AT(m, r, c) m->data[matrix_compute_idx(m, r, c)]
+#define DATA_AT(m, r, c) ((m)->data[matrix_compute_idx(m, r, c)])
 
 /*
 initializes the matrix, returns -1 if the rows or columns specified are invalid, or if allocation fails
@@ -244,11 +244,9 @@ int matrix_set_yaw(Matrix *m, double yaw) {
 int matrix_multiply(Matrix *m1, Matrix *m2, Matrix *dest) {
 	if (m2->rows != m1->columns) return -1;
 
-	if (!matrix_check_dim(dest, m1->rows, m2->columns)) {
-		int reset_result = matrix_reset(dest, m1->rows, m2->columns);
+	Matrix temp;
 
-		if (reset_result == -1) return -1;
-	}
+	matrix_init(&temp, m1->rows, m2->columns);
 
 	for (int r = 0; r < m1->rows; ++r) {
 		for (int c = 0; c < m2->columns; ++c) {
@@ -256,9 +254,15 @@ int matrix_multiply(Matrix *m1, Matrix *m2, Matrix *dest) {
 			for (int i = 0; i < m1->columns; ++i) {
 				result += DATA_AT(m1, r, i) * DATA_AT(m2, i, c);
 			}
-			matrix_set_index(dest, r, c, result);
+			matrix_set_index(&temp, r, c, result);
 		}
 	}
+
+	int copy_result = matrix_copy(&temp, dest);
+
+	matrix_free(&temp);
+
+	if(copy_result == -1) return -1;
 
 	return 0;
 }
@@ -313,17 +317,21 @@ void matrix_subtract_const(Matrix *m, double n) {
 }
 
 int matrix_transpose(Matrix *m, Matrix *dest) {
-	if (!matrix_check_dim(dest, m->columns, m->rows)) {
-		int reset_result = matrix_reset(dest, m->columns, m->rows);
+	Matrix temp;
 
-		if (reset_result == -1) return -1;
-	}
+	matrix_init(&temp, m->columns, m->rows);
 
-	for (int r = 0; r < dest->rows; ++r) {
-		for (int c = 0; c < dest->columns; ++c) {
-			DATA_AT(dest, r, c) = DATA_AT(m, c, r);
+	for (int r = 0; r < temp.rows; ++r) {
+		for (int c = 0; c < temp.columns; ++c) {
+			DATA_AT(&temp, r, c) = DATA_AT(m, c, r);
 		}
 	}
+
+	int copy_result = matrix_copy(&temp, dest);
+
+	matrix_free(&temp);
+
+	if(copy_result == -1) return -1;
 
 	return 0;
 }
