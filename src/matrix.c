@@ -238,9 +238,6 @@ int matrix_set_yaw(Matrix *m, double yaw) {
 }
 
 // multiply
-// NOTE: make this function work with dest being able to be any matrix (including m1 or m2)
-// do this by making a temporary matrix (with the correct dimentions), 
-// and copy its data to dest after everything is finished (make sure to free the temp matrix)
 int matrix_multiply(Matrix *m1, Matrix *m2, Matrix *dest) {
 	if (m2->rows != m1->columns) return -1;
 
