@@ -63,6 +63,8 @@ int matrix_multiply(Matrix *m1, Matrix *m2, Matrix *dest);
 // multiply scalar
 void matrix_multiply_scalar(Matrix *m, double scalar);
 
+// NOTE: consider making add and subtract functions output to a destination matrix
+
 // add
 int matrix_add(Matrix *m1, Matrix *m2);
 
