@@ -40,18 +40,20 @@ int matrix_set_column(Matrix *m, int column, double *data);
 
 /*
 MAYBE ADD THESE
+
 NOTE: each function copies the data at the specified location to a desitination pointer
 get index(matrix, dest, row, column)
 get row(matrix, dest array, row)
 get colum(matrix, dest array, column)
 get data(matrix, dest 2d array)
 
-MAYBE ADD THESE
-add row
-add column
-remove row
-remove column
+// add row
+// add column
+// remove row
+// remove column
 */
+
+// add / remove functions are used internally, user can use them if they want
 
 // NOTE: add these when adding invert funcs
 // muliply row by const
@@ -81,9 +83,15 @@ void matrix_subtract_const(Matrix *m, double n);
 // also, make it possible to make the input matrix the destination
 // invert
 
-// determinat
+// calculates the determinant of any square matrix (is recursive)
+int matrix_calc_determinant(Matrix *m, double *dest);
 
-// rotation matricies
+// more common non recursive determinant functions (for 2x2 and 3x3 matrices respectively)
+int matrix_calc_determinant_2x2(Matrix *m, double *dest);
+
+int matrix_calc_determinant_3x3(Matrix *m, double *dest);
+
+// rotation matrices
 int matrix_set_rotation_3d(Matrix *m, double pitch, double yaw, double roll);
 
 int matrix_set_rotation_2d(Matrix *m, double angle);

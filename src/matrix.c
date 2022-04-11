@@ -4,14 +4,14 @@
 #include <math.h>
 #include "matrix.h"
 
-#define DATA_AT(m, r, c) ((m)->data[matrix_compute_idx(m, r, c)])
+#define DATA_AT(m, r, c) ( (m)->data[matrix_compute_idx(m, r, c)] )
 
 /*
 initializes the matrix, returns -1 if the rows or columns specified are invalid, or if allocation fails
 all members of the matrix will be initialized to 0 if initialization failed
 returns 0 if initialization was successful
 
-NOTE: maybe disallow matricies to have 0 rows or columns 
+NOTE: maybe disallow matricies to have 0 rows or columns
 (although free(NULL) doesn't do anything so..., AND every function works with 0x0 matricies)
 */
 int matrix_init(Matrix *m, int rows, int columns) {
@@ -162,7 +162,7 @@ int matrix_set_rotation_3d(Matrix *m, double roll, double pitch, double yaw) {
 	double data[3][3] = {
 		{c_p * c_y, s_r * s_p * c_y - c_r * s_y, c_r * s_p * c_y + s_r * s_y},
 		{c_p * s_y, s_r * s_p * s_y + c_r * c_y, c_r * s_p * s_y - s_r * c_y},
-		{-s_p, s_r * c_p, c_r * c_p}
+		{ -s_p, s_r * c_p, c_r * c_p}
 	};
 
 	matrix_set_data(m, data);
@@ -212,7 +212,7 @@ int matrix_set_pitch(Matrix *m, double pitch) {
 	double data[3][3] = {
 		{c, 0, s},
 		{0, 1, 0},
-		{-s, 0, c}
+		{ -s, 0, c}
 	};
 
 	matrix_set_data(m, data);
@@ -259,7 +259,7 @@ int matrix_multiply(Matrix *m1, Matrix *m2, Matrix *dest) {
 
 	matrix_free(&temp);
 
-	if(copy_result == -1) return -1;
+	if (copy_result == -1) return -1;
 
 	return 0;
 }
@@ -313,6 +313,88 @@ void matrix_subtract_const(Matrix *m, double n) {
 	}
 }
 
+int matrix_calc_determinant(Matrix *m, double *dest) {
+	if (!matrix_check_square(m)) return -1;
+
+	// if the matrix is 2x2, run calc_determinant_2x2 and return
+	if (matrix_check_dim(m, 2, 2)) return matrix_calc_determinant_2x2(m, dest);
+
+	double terms_array[m->rows];
+
+	// for every element in the first row of the matrix...
+	for (int i = 0; i < m->rows; ++i) {
+		// make a temp matrix whose dimentions are m->rows - 1 and m-> columns - 1
+		Matrix temp;
+		double data[m->rows - 1][m->columns - 1];
+		int add_one = 0;
+
+		// initialize the temp matrix, ignoring the rows and columns that the element at index (0, i) is in
+		for (int r = 0; r < m->rows - 1; ++r) {
+			for (int c = 0; c < m->columns - 1; ++c)
+			{
+				if (c == i) add_one = 1;
+
+				if (add_one) {
+					data[r][c] = DATA_AT(m, r + 1, c + 1);
+				} else {
+					data[r][c] = DATA_AT(m, r + 1, c);
+				}
+			}
+			add_one = 0;
+		}
+
+		// finish initializing the temp matrix
+		matrix_init(&temp, m->rows - 1, m->columns - 1);
+		matrix_set_data(&temp, data);
+
+		// calculate the determinant of the temp matrix
+		matrix_calc_determinant(&temp, dest);
+
+		// multiply the calculated determinant above with the element at m, index (0, i), add it to an array of algebraic terms
+		terms_array[i] = DATA_AT(m, 0, i) * *dest;
+
+		// free the temporary matrix
+		matrix_free(&temp);
+	}
+
+	// the final calculated determanent
+	double det = 0;
+
+	// for every element added to the array of terms...
+	for (int i = 0; i < m->rows; ++i) {
+		// add or subtract them in an alternating fashion
+		if (i % 2 == 0) {
+			det += terms_array[i];
+		} else {
+			det -= terms_array[i];
+		}
+	}
+
+	*dest = det;
+
+	return 0;
+}
+
+// determinant of a 2d matrix
+int matrix_calc_determinant_2x2(Matrix *m, double *dest) {
+	if (!matrix_check_dim(m, 2, 2)) return -1;
+
+	*dest = DATA_AT(m, 0, 0) * DATA_AT(m, 1, 1) - DATA_AT(m, 0, 1) * DATA_AT(m, 1, 0);
+
+	return 0;
+}
+
+// determinant of a 3d matrix
+int matrix_calc_determinant_3x3(Matrix *m, double *dest) {
+	if (!matrix_check_dim(m, 3, 3)) return -1;
+
+	*dest = DATA_AT(m, 0, 0) * (DATA_AT(m, 1, 1) * DATA_AT(m, 2, 2) - DATA_AT(m, 1, 2) * DATA_AT(m, 2, 1)) -
+	        DATA_AT(m, 0, 1) * (DATA_AT(m, 1, 0) * DATA_AT(m, 2, 2) - DATA_AT(m, 1, 2) * DATA_AT(m, 2, 0)) +
+	        DATA_AT(m, 0, 2) * (DATA_AT(m, 1, 0) * DATA_AT(m, 2, 1) - DATA_AT(m, 1, 1) * DATA_AT(m, 2, 0));
+
+	return 0;
+}
+
 int matrix_transpose(Matrix *m, Matrix *dest) {
 	Matrix temp;
 
@@ -328,7 +410,7 @@ int matrix_transpose(Matrix *m, Matrix *dest) {
 
 	matrix_free(&temp);
 
-	if(copy_result == -1) return -1;
+	if (copy_result == -1) return -1;
 
 	return 0;
 }
